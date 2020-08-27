@@ -1,0 +1,102 @@
+Project management system.
+
++ 1) Я как пользователь хочу создавать отдельное пространство для работы над конкретным проектом.
+   Параметры:
+    - название;
+    - описание;
+    - имя подразделение;
+    - имя руководителя;
+    - имя администратора;
+
++2) Я как пользователь хочу заводить разные типы задач в backlog:
+    - epic;
+    - story;
+    - task;
+    - bug;
+
+3) Я как пользователь хочу декомпозировать задачи с привязкой к родительской задаче
+   и переносить задачи из backlog в sprint.
+
+    @Override
+       public boolean fromSprintToBacklog(IssueInProject issue, Sprint sprint) {
+           return sprint.removeIssue(issue) & backlog.addIssue(issue);
+       }
+
+       @Override
+       public boolean fromBacklogToSprint(IssueInProject issue, Sprint sprint) {
+           return backlog.removeIssue(issue) & sprint.addIssue(issue);
+       }
+
+       @Override
+       public boolean addSprint(Sprint sprint) {
+           return sprints.add(sprint);
+       }
+
+       @Override
+       public boolean removeSprint(Sprint sprint) {
+           return sprints.remove(sprint);
+       }
+
+4) Я как пользователь хочу гибко настраивать фильтры задач в backlog:
+    - по приоритету;
+    - по времени создания;
+    - по названию;
+    - по исполнителю;
+    - по reporter-у;
+
+      @Override
+        public boolean addIssue(IssueInProject issue) {
+           return issueInProjects.add(issue);
+        }
+
+        @Override
+        public boolean removeIssue(IssueInProject issue) {
+           return issueInProjects.remove(issue);
+        }
+
+        @Override
+        public List<IssueInProject> priorityFilter(IssuePriority issuePriority) {
+            return issueInProjects.stream()
+                    .filter(x->x.getIssuePriority().equals(issuePriority))
+                    .collect(Collectors.toList());
+        }
+
+     @Override
+        public List<IssueInProject> dataCreateFilter(Date start, Date end) {
+            return issueInProjects.stream()
+                    .filter(x->x.getDataCreate().after(start)&x.getDataCreate().before(end))
+                    .collect(Collectors.toList());
+        }
+
+        @Override
+        public List<IssueInProject> titleFilter(String title) {
+            return issueInProjects.stream()
+                    .filter(x->x.getTitle().equals(title))
+                    .collect(Collectors.toList());
+        }
+
+        @Override
+        public List<IssueInProject> executorFilter(String executor) {
+            return issueInProjects.stream()
+                    .filter(x->x.getExecutor().equals(executor))
+                    .collect(Collectors.toList());
+        }
+
+        @Override
+        public List<IssueInProject> reporterFilter(String reporter) {
+            return issueInProjects.stream()
+                    .filter(x->x.getReporter().equals(reporter))
+                    .collect(Collectors.toList());
+        }
+
+5) Я как пользователь хочу управлять жизненным циклом конкретной задачи и гибко настраивать workflow:
+    - Open Issue;
+    - InProgress Issue;
+    - Review Issue;
+    - Test Issue;
+    - Resolved Issue;
+    - ReOpened Issue;
+    - Close Issue.
+
+
+TODO: размапить страницы + сделать фильтер по задачам
