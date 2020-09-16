@@ -1,7 +1,11 @@
 package com.project.entities.issue;
 
+import com.project.entities.Backlog;
+import com.project.entities.Sprint;
+import com.project.entities.User;
+
 import javax.persistence.*;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "issues")
@@ -15,46 +19,56 @@ public class Issue {
     private String title;
 
     @Column(name = "issue_type")
-    private String issueType;
+    private IssueType issueType;
 
-    @Column(name = "parent_issue_id")
-    private Integer parentIssue;
+    @ManyToOne
+    @JoinColumn(name = "sprint_id")
+    private Sprint sprint;
+
+    @OneToOne
+    @JoinColumn(name = "parent_issue_id")
+    private Issue parentIssue;
 
     @Column(name = "date_create")
-    private Date dataCreate;
+    private LocalDate dataCreate;
 
     @Column(name = "description")
     private String description;
 
-    @Column(name = "executor_id")
-    private Integer executor;
+    @ManyToOne
+    @JoinColumn(name = "executor_id")
+    private User executor;
 
-    @Column(name = "reporter_id")
-    private Integer reporter;
+    @ManyToOne
+    @JoinColumn(name = "reporter_id")
+    private User reporter;
 
-    @Enumerated(value = EnumType.ORDINAL)
+    @Column(name = "workflow")
+    @Enumerated(value = EnumType.STRING)
     private WorkFlowIssue workFlowIssue;
 
     @Column(name = "issue_priority")
     @Enumerated(value = EnumType.STRING)
     private IssuePriority issuePriority;
 
-    @Column(name = "backlog_id")
-    private Integer backlog;
+    @ManyToOne
+    @JoinColumn(name = "backlog_id")
+    private Backlog backlog;
 
     public Issue() {
 
     }
 
-    public Issue(String title, String description, String issueType,
-                 Integer backlog,
-                 Integer executor, Integer reporter) {
+    public Issue(String title, String description, IssueType issueType, IssuePriority issuePriority,
+                 Backlog backlog,
+                 User executor, User reporter) {
         this.title=title;
         this.description=description;
         this.issueType = issueType;
+        this.issuePriority = issuePriority;
         this.backlog = backlog;
         this.workFlowIssue = WorkFlowIssue.OPEN_ISSUE;
-        this.dataCreate = new Date();
+        this.dataCreate = LocalDate.now();
         this.executor=executor;
         this.reporter=reporter;
     }
@@ -75,19 +89,35 @@ public class Issue {
         this.title = title;
     }
 
-    public Integer getParentIssue() {
+    public IssueType getIssueType() {
+        return issueType;
+    }
+
+    public void setIssueType(IssueType issueType) {
+        this.issueType = issueType;
+    }
+
+    public Sprint getSprint() {
+        return sprint;
+    }
+
+    public void setSprint(Sprint sprint) {
+        this.sprint = sprint;
+    }
+
+    public Issue getParentIssue() {
         return parentIssue;
     }
 
-    public void setParentIssue(Integer parentIssue) {
+    public void setParentIssue(Issue parentIssue) {
         this.parentIssue = parentIssue;
     }
 
-    public Date getDataCreate() {
+    public LocalDate getDataCreate() {
         return dataCreate;
     }
 
-    public void setDataCreate(Date dataCreate) {
+    public void setDataCreate(LocalDate dataCreate) {
         this.dataCreate = dataCreate;
     }
 
@@ -99,19 +129,19 @@ public class Issue {
         this.description = description;
     }
 
-    public Integer getExecutor() {
+    public User getExecutor() {
         return executor;
     }
 
-    public void setExecutor(Integer executor) {
+    public void setExecutor(User executor) {
         this.executor = executor;
     }
 
-    public Integer getReporter() {
+    public User getReporter() {
         return reporter;
     }
 
-    public void setReporter(Integer reporter) {
+    public void setReporter(User reporter) {
         this.reporter = reporter;
     }
 
@@ -131,19 +161,39 @@ public class Issue {
         this.issuePriority = issuePriority;
     }
 
-    public Integer getBacklog() {
+    public Backlog getBacklog() {
         return backlog;
     }
 
-    public void setBacklog(Integer backlog) {
+    public void setBacklog(Backlog backlog) {
         this.backlog = backlog;
     }
 
-    public String getIssueType() {
-        return issueType;
+    public enum WorkFlowIssue {
+        OPEN_ISSUE("Open issue"),
+        INPROGRESS_ISSUE("In progress issue"),
+        REVIEW_ISSUE("Review issue"),
+        TEST_ISSUE("Test issue"),
+        RESOLVED_ISSUE("Resolved issue"),
+        REOPENED_ISSUE("ReOpened Issue"),
+        CLOSE_ISSUE("Close Issue");
+
+        String title;
+
+        WorkFlowIssue(String title){
+            this.title = title;
+        }
+
+        WorkFlowIssue() {
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
     }
 
-    public void setIssueType(String issueType) {
-        this.issueType = issueType;
-    }
 }

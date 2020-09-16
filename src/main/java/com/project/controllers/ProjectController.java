@@ -2,18 +2,23 @@ package com.project.controllers;
 
 import com.project.entities.Backlog;
 import com.project.entities.Project;
+import com.project.entities.Sprint;
 import com.project.entities.User;
 import com.project.entities.issue.Issue;
-import com.project.repository.BacklogRepository;
-import com.project.repository.IssueRepository;
-import com.project.repository.ProjectRepository;
-import com.project.repository.UserRepository;
+import com.project.entities.issue.IssuePriority;
+import com.project.entities.issue.IssueType;
+import com.project.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.List;
+import java.time.LocalDate;
+import java.util.*;
 
 @Controller
 public class ProjectController {
@@ -30,11 +35,24 @@ public class ProjectController {
     @Autowired
     private IssueRepository issueRepository;
 
+    @Autowired
+    private SprintRepository sprintRepository;
+
+    @GetMapping
+    public String greeting() {
+        return "greeting";
+    }
+
     @GetMapping("createProject")
     public String getUsers(Model model) {
         Iterable<User> users = userRepository.findAll();
         model.addAttribute("users", users);
 
+        return "createProject";
+    }
+
+    @GetMapping(value = "createProject", params = "tpl")
+    public String backToCreateProject() {
         return "createProject";
     }
 
@@ -55,20 +73,41 @@ public class ProjectController {
     public String getProjectById(@PathVariable("id") Integer projectId,
                                  Model model) {
 
+        Project project = projectRepository.findById(projectId).get();
+        Integer supervisorId = projectRepository.findById(projectId).get().getSupervisor().getId();
+        Integer adminId = projectRepository.findById(projectId).get().getAdmin().getId();
+
         model
                 .addAttribute("projectID",projectRepository.findById(projectId).get().getId())
                 .addAttribute("title",projectRepository.findById(projectId).get().getTitle())
                 .addAttribute("description", projectRepository.findById(projectId).get().getDescription())
-                .addAttribute("supervisorID", projectRepository.findById(projectId).get().getSupervisor())
+                .addAttribute("supervisor", userRepository.findById(supervisorId).get().getFirstName()
+                        .concat(" ")
+                        .concat( userRepository.findById(supervisorId).get().getLastName()))
                 .addAttribute("subdivision", projectRepository.findById(projectId).get().getSubdivision())
-                .addAttribute("adminID", projectRepository.findById(projectId).get().getAdmin());
+                .addAttribute("admin", userRepository.findById(supervisorId).get().getFirstName()
+                        .concat(" ")
+                        .concat( userRepository.findById(adminId).get().getLastName()));
 
-        model.addAttribute("backlogTitle", backlogRepository.findByProjectId(projectId).getTitle());
+        model.addAttribute("backlogTitle", backlogRepository.findByProject(project).getTitle());
 
-        Integer backlogId = backlogRepository.findByProjectId(projectId).getId();
+        Backlog backlog = backlogRepository.findByProject(project);
 
-        List<Issue> issues = issueRepository.findByBacklog(backlogId);
+        List<Issue> issues = issueRepository.findByBacklog(backlog);
+        List<Sprint> sprints = sprintRepository.findByProject(project);
+        List<Issue.WorkFlowIssue> workFlowsIssue= new ArrayList<>();
+        workFlowsIssue.add(Issue.WorkFlowIssue.OPEN_ISSUE);
+        workFlowsIssue.add(Issue.WorkFlowIssue.INPROGRESS_ISSUE);
+        workFlowsIssue.add(Issue.WorkFlowIssue.REVIEW_ISSUE);
+        workFlowsIssue.add(Issue.WorkFlowIssue.TEST_ISSUE);
+        workFlowsIssue.add(Issue.WorkFlowIssue.RESOLVED_ISSUE);
+        workFlowsIssue.add(Issue.WorkFlowIssue.REOPENED_ISSUE);
+        workFlowsIssue.add(Issue.WorkFlowIssue.CLOSE_ISSUE);
+
+        model.addAttribute("sprints", sprints);
         model.addAttribute("issues", issues);
+        model.addAttribute("workflows", workFlowsIssue);
+        model.addAttribute("users", userRepository.findAll());
 
         return "projectInfo";
     }
@@ -81,23 +120,24 @@ public class ProjectController {
                                 @RequestParam String admin,
                                 Model model) {
 
-        Integer supervisorId = Integer.parseInt(supervisor);
-        Integer adminId = Integer.parseInt(admin);
-        Project project = new Project(title, description, subdivision,supervisorId,adminId);
+        User supervisorUser = userRepository.findById(Integer.parseInt(supervisor)).get();
+        User adminUser = userRepository.findById(Integer.parseInt(admin)).get();
+
+        Project project = new Project(title, description, subdivision,supervisorUser,adminUser);
         projectRepository.save(project);
 
         Integer projectId = project.getId();
 
-        Backlog backlog = new Backlog("Backlog", projectId);
+        Backlog backlog = new Backlog("Backlog" + " " + projectId, project);
         backlogRepository.save(backlog);
 
         model
                 .addAttribute("projectID",projectId)
                 .addAttribute("title",title)
                 .addAttribute("description", description)
-                .addAttribute("supervisorID", supervisorId)
+                .addAttribute("supervisorID", supervisor)
                 .addAttribute("subdivision", subdivision)
-                .addAttribute("adminID", adminId);
+                .addAttribute("adminID", admin);
 
         model.addAttribute("backlogTitle", backlog.getTitle());
 
@@ -110,18 +150,21 @@ public class ProjectController {
                                @RequestParam String description,
                                @RequestParam String executor,
                                @RequestParam String reporter,
-                               @RequestParam String issueType,
+                               @RequestParam IssuePriority issuePriority,
+                               @RequestParam IssueType issueType,
                                Model model
                                ) {
 
-        Integer executorId = Integer.parseInt(executor);
-        Integer reporterId = Integer.parseInt(reporter);
+        Project project = projectRepository.findById(projectId).get();
+        User executorUser = userRepository.findById(Integer.parseInt(executor)).get();
+        User reporterUser = userRepository.findById(Integer.parseInt(reporter)).get();
 
-        Integer backlogId = backlogRepository.findByProjectId(projectId).getId();
-        Issue issue = new Issue(title, description, issueType, backlogId, executorId, reporterId);
+        Backlog backlog = backlogRepository.findByProject(project);
+        Issue issue = new Issue(title, description, issueType, issuePriority, backlog, executorUser, reporterUser);
         issueRepository.save(issue);
 
-        List<Issue> issues = issueRepository.findByBacklog(backlogId);
+        List<Issue> issues = issueRepository.findByBacklog(backlogRepository.findByProject(project));
+        List<Sprint> sprints = sprintRepository.findByProject(project);
         model.addAttribute("issues", issues);
 
         model
@@ -132,52 +175,77 @@ public class ProjectController {
                 .addAttribute("subdivision", projectRepository.findById(projectId).get().getSubdivision())
                 .addAttribute("adminID", projectRepository.findById(projectId).get().getAdmin());
 
-        model.addAttribute("backlogTitle", backlogRepository.findByProjectId(projectId).getTitle());
+        model.addAttribute("backlogTitle", backlogRepository.findByProject(project).getTitle());
+        model.addAttribute("sprints", sprints);
 
-        return "projectInfo";
+        return "redirect:/project/{id}/projectInfo";
     }
 
-    @GetMapping(value = "project/{id}/issues")
-    public String getIssues(@PathVariable("id") Integer id, Model model) {
+    @GetMapping("project/{id}/issues")
+    public String getIssues(@PathVariable("id") Integer projectId, Model model) {
 
-        Integer backlogId = backlogRepository.findByProjectId(id).getId();
+        Project project = projectRepository.findById(projectId).get();
+        Backlog backlog = backlogRepository.findByProject(project);
 
-        List<Issue> issues = issueRepository.findByBacklog(backlogId);
-
-        model.addAttribute("issues", issues);
-        return "projectInfo";
-    }
-
-    @PostMapping("project/{id}/projectInfo/titleFilter")
-    public String titleFilter(@PathVariable("id") Integer projectId, @RequestParam String title, Model model) {
-        Iterable<Issue> issues;
-        Integer backlogId = backlogRepository.findByProjectId(projectId).getId();
-
-        if(title!=null & !title.isEmpty()) {
-            issues = issueRepository.findByTitle(title);
-        } else {
-            issues = issueRepository.findByBacklog(backlogId);
-        }
-
-        model
-                .addAttribute("projectID",projectRepository.findById(projectId).get().getId())
-                .addAttribute("title",projectRepository.findById(projectId).get().getTitle())
-                .addAttribute("description", projectRepository.findById(projectId).get().getDescription())
-                .addAttribute("supervisorID", projectRepository.findById(projectId).get().getSupervisor())
-                .addAttribute("subdivision", projectRepository.findById(projectId).get().getSubdivision())
-                .addAttribute("adminID", projectRepository.findById(projectId).get().getAdmin());
-
-        model.addAttribute("backlogTitle", backlogRepository.findByProjectId(projectId).getTitle());
+        List<Issue> issues = issueRepository.findByBacklog(backlog);
 
         model.addAttribute("issues", issues);
-
         return "projectInfo";
     }
 
     @GetMapping("/project/{id}/issueListInProject")
     public String goToIssueList(@PathVariable("id") Integer projectId,
                                 Model model) {
-        Integer backlogId = backlogRepository.findByProjectId(projectId).getId();
+        Project project = projectRepository.findById(projectId).get();
+        Backlog backlog = backlogRepository.findByProject(project);
+        List<Sprint> sprints = sprintRepository.findByProject(project);
+
+        Set<User> allExecutorsIssuesInProject = new HashSet<>();
+        Set<User> allReportersIssuesInProject = new HashSet<>();
+
+        List<Issue> allIssuesInBacklog = issueRepository.findByBacklog(backlog);
+        for (Issue issue : allIssuesInBacklog) {
+            allExecutorsIssuesInProject.add(issue.getExecutor());
+            allReportersIssuesInProject.add(issue.getReporter());
+        }
+
+        model
+                .addAttribute("projectID",projectRepository.findById(projectId).get().getId())
+                .addAttribute("title",projectRepository.findById(projectId).get().getTitle())
+                .addAttribute("description", projectRepository.findById(projectId).get().getDescription())
+                .addAttribute("supervisorID", projectRepository.findById(projectId).get().getSupervisor().getFirstName()
+                        .concat(" ")
+                        .concat(projectRepository.findById(projectId).get().getSupervisor().getLastName()))
+                .addAttribute("subdivision", projectRepository.findById(projectId).get().getSubdivision())
+                .addAttribute("adminID", projectRepository.findById(projectId).get().getAdmin().getFirstName()
+                .concat(" ")
+                .concat(projectRepository.findById(projectId).get().getAdmin().getLastName()));
+
+        model.addAttribute("backlogTitle", backlogRepository.findByProject(project).getTitle());
+        model.addAttribute("executorsInProject", allExecutorsIssuesInProject);
+        model.addAttribute("reportersInProject", allReportersIssuesInProject);
+
+        model.addAttribute("issues", issueRepository.findByBacklog(backlog));
+        model.addAttribute("parentIssue", issueRepository.findByBacklog(backlog));
+        model.addAttribute("users", userRepository.findAll());
+        model.addAttribute("sprints", sprints);
+        return "issueListInProject";
+    }
+
+    @PostMapping("project/{id}/projectInfo/createSprint")
+    public String createSprint(@PathVariable("id") Integer projectId,
+                                @RequestParam String title,
+                                @RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+                                @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+                                Model model) {
+
+        Project project = projectRepository.findById(projectId).get();
+        Backlog backlog = backlogRepository.findByProject(project);
+
+        Sprint sprint = new Sprint(project, title, startDate ,endDate);
+        sprintRepository.save(sprint);
+
+        List<Sprint> sprints = sprintRepository.findByProject(project);
 
         model
                 .addAttribute("projectID",projectRepository.findById(projectId).get().getId())
@@ -187,11 +255,42 @@ public class ProjectController {
                 .addAttribute("subdivision", projectRepository.findById(projectId).get().getSubdivision())
                 .addAttribute("adminID", projectRepository.findById(projectId).get().getAdmin());
 
-        model.addAttribute("backlogTitle", backlogRepository.findByProjectId(projectId).getTitle());
+        model.addAttribute("backlogTitle", backlogRepository.findByProject(project).getTitle());
 
-        model.addAttribute("issues", issueRepository.findByBacklog(backlogId));
-        return "issueListInProject";
+        model.addAttribute("sprints", sprints);
+        model.addAttribute("issues", issueRepository.findByBacklog(backlog));
+
+        return "redirect:/project/{id}/projectInfo";
     }
 
+    @PostMapping("project/{id}/projectInfo/changeWorkFlow/issue/{issue.id}")
+    public String changeWorkflow(Model model,
+                                 @PathVariable("id") Integer projectId,
+                                 @PathVariable("issue.id") Integer issueId,
+                                 @RequestParam Issue.WorkFlowIssue workflow
+                                 ) {
 
+        Project project = projectRepository.findById(projectId).get();
+        Backlog backlog = backlogRepository.findByProject(project);
+
+        Issue issue = issueRepository.findById(issueId).get();
+        if (workflow != null) {
+            issue.setWorkFlowIssue(workflow);
+            issueRepository.save(issue);
+        }
+        model.addAttribute("issues", issueRepository.findByBacklog(backlog));
+
+        model
+                .addAttribute("projectID",projectRepository.findById(projectId).get().getId())
+                .addAttribute("title",projectRepository.findById(projectId).get().getTitle())
+                .addAttribute("description", projectRepository.findById(projectId).get().getDescription())
+                .addAttribute("supervisorID", projectRepository.findById(projectId).get().getSupervisor())
+                .addAttribute("subdivision", projectRepository.findById(projectId).get().getSubdivision())
+                .addAttribute("adminID", projectRepository.findById(projectId).get().getAdmin());
+
+        model.addAttribute("backlogTitle", backlogRepository.findByProject(project).getTitle());
+        model.addAttribute("users", userRepository.findAll());
+
+        return "redirect:/project/{id}/projectInfo";
+    }
 }

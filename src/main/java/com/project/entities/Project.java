@@ -8,7 +8,7 @@ public class Project {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    private Integer id;
 
     @Column(name="title")
     private String title;
@@ -19,13 +19,15 @@ public class Project {
     @Column(name="subdivision")
     private String subdivision;
 
-    @Column(name = "supervisor_id")
-    private Integer supervisor;
+    @OneToOne
+    @JoinColumn(name = "supervisor_id")
+    private User supervisor;
 
-    @Column(name="admin_id")
-    private Integer admin;
+    @OneToOne
+    @JoinColumn(name="admin_id")
+    private User admin;
 
-    public Project(String title, String description, String subdivision, Integer supervisor, Integer admin) {
+    public Project(String title, String description, String subdivision, User supervisor, User admin) {
         this.title=title;
         this.description=description;
         this.subdivision=subdivision;
@@ -36,11 +38,11 @@ public class Project {
     public Project() {
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -68,20 +70,19 @@ public class Project {
         this.subdivision = subdivision;
     }
 
-    public Integer getSupervisor() {
+    public User getSupervisor() {
         return supervisor;
     }
 
-    public void setSupervisor(Integer supervisor) {
+    public void setSupervisor(User supervisor) {
         this.supervisor = supervisor;
     }
 
-    public Integer getAdmin() {
+    public User getAdmin() {
         return admin;
     }
 
-    public void setAdmin(Integer admin) {
+    public void setAdmin(User admin) {
         this.admin = admin;
     }
-
 }

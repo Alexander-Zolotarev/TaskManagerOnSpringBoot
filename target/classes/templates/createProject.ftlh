@@ -12,21 +12,22 @@
     </div>
 </#list>
 <a href="addUser">Add participant</a>
+<h1>Create project</h1>
 <div>
     <form method="post" action="createProject">
         <label>Название</label>
-        <input type="text" name="title" /><br>
+        <p><input type="text" name="title" /></p>
         <label>Описание</label>
-        <input type="text" name="description" /><br>
+        <p><textarea name="description"></textarea></p>
         <label>Название подразделения</label>
-        <input type="text" name="subdivision" /><br>
+        <p><input type="text" name="subdivision" /></p>
         <label>ID руководителя</label>
-        <input type="text" name="supervisor" /><br>
+        <p><input type="text" name="supervisor" /></p>
         <label>ID администратора</label>
-        <input type="text" name="admin" /><br>
+        <p><input type="text" name="admin" /></p>
         <button type="submit">Добавить</button>
     </form>
 </div>
-<a href="/projectsList">To projects list</a>
+<a href="/projectsList" id="tpl">To projects list</a>
 </body>
 </html>

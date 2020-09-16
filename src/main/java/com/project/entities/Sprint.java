@@ -1,10 +1,7 @@
 package com.project.entities;
 
-import com.project.entities.issue.Issue;
-
 import javax.persistence.*;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "sprints")
@@ -12,33 +9,35 @@ public class Sprint{
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    private Integer id;
 
     @Column(name = "title")
     private String title;
 
-    @Column(name = "project_id")
-    private Integer project;
+    @ManyToOne
+    @JoinColumn(name = "project_id")
+    private Project project;
 
     @Column(name = "start_date")
-    private Date startDate;
+    private LocalDate startDate;
 
     @Column(name = "end_date")
-    private Date endDate;
+    private LocalDate endDate;
 
     public Sprint() {}
 
-    public Sprint(String title, Date startDate, Date endDate) {
+    public Sprint(Project project, String title, LocalDate startDate, LocalDate endDate) {
+        this.project=project;
         this.title = title;
         this.startDate = startDate;
         this.endDate = endDate;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -50,27 +49,27 @@ public class Sprint{
         this.title = title;
     }
 
-    public Integer getProject() {
+    public Project getProject() {
         return project;
     }
 
-    public void setProject(Integer project) {
+    public void setProject(Project project) {
         this.project = project;
     }
 
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
 
-    public Date getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(Date endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
 }

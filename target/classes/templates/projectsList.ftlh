@@ -12,8 +12,8 @@
         <th>Title</th>
         <th>Description</th>
         <th>Subdivision</th>
-        <th>SupervisorID</th>
-        <th>AdminID</th>
+        <th>Supervisor</th>
+        <th>Admin</th>
     </tr>
     <#list projects as project>
         <tr>
@@ -21,10 +21,11 @@
             <td>${project.title}</td>
             <td>${project.description}</td>
             <td>${project.subdivision}</td>
-            <td>${project.supervisor}</td>
-            <td>${project.admin}</td>
+            <td>${project.supervisor.firstName + " " + project.supervisor.lastName}</td>
+            <td>${project.admin.firstName + " " + project.admin.lastName}</td>
         </tr>
     </#list>
 </table>
+<a href="createProject">Back</a>
 </body>
 </html>

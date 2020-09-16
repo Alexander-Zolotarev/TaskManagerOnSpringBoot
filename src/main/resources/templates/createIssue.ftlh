@@ -24,6 +24,13 @@
         <input type="text" name="executor" /><br>
         <label>Репортер</label>
         <input type="text" name="reporter" /><br>
+        <label>Приоритет задачи</label>
+        <select name="issuePriority">
+            <option disabled>Выберите приоритет задачи</option>
+            <option value="LOW">LOW</option>
+            <option value="MIDDLE">MIDDLE</option>
+            <option value="HIGH">HIGH</option>
+        </select>
         <label>Тип задачи</label>
         <select name="issueType">
             <option disabled>Выберите тип задачи</option>

@@ -13,16 +13,17 @@ public class Backlog{
     @Column(name = "title")
     private String title;
 
-    @Column(name = "project_id")
-    private Integer projectId;
+    @OneToOne
+    @JoinColumn(name = "project_id")
+    private Project project;
 
     public Backlog() {
 
     }
 
-    public Backlog(String title, Integer projectId) {
+    public Backlog(String title, Project project) {
         this.title = title;
-        this.projectId = projectId;
+        this.project = project;
     }
 
     public Integer getId() {
@@ -41,11 +42,11 @@ public class Backlog{
         this.title = title;
     }
 
-    public Integer getProjectId() {
-        return projectId;
+    public Project getProject() {
+        return project;
     }
 
-    public void setProjectId(Integer projectId) {
-        this.projectId = projectId;
+    public void setProject(Project project) {
+        this.project = project;
     }
 }
