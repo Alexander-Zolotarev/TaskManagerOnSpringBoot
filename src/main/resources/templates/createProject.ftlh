@@ -11,14 +11,15 @@
         <span>${user.lastName!"none"}</span>
     </div>
 </#list>
-<a href="addUser">Add participant</a>
+<a href="addUser">Add participant</a><br>
+<a href="/projectsList" id="tpl">To projects list</a>
 <h1>Create project</h1>
 <div>
     <form method="post" action="createProject">
         <label>Название</label>
-        <p><input type="text" name="title" /></p>
-        <label>Описание</label>
-        <p><textarea name="description"></textarea></p>
+        <input type="text" name="title" />
+        <p><label>Описание</label></p>
+        <textarea name="description"></textarea>
         <label>Название подразделения</label>
         <p><input type="text" name="subdivision" /></p>
         <label>ID руководителя</label>
@@ -28,6 +29,5 @@
         <button type="submit">Добавить</button>
     </form>
 </div>
-<a href="/projectsList" id="tpl">To projects list</a>
 </body>
 </html>

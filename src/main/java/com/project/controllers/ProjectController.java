@@ -5,8 +5,6 @@ import com.project.entities.Project;
 import com.project.entities.Sprint;
 import com.project.entities.User;
 import com.project.entities.issue.Issue;
-import com.project.entities.issue.IssuePriority;
-import com.project.entities.issue.IssueType;
 import com.project.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -150,8 +148,8 @@ public class ProjectController {
                                @RequestParam String description,
                                @RequestParam String executor,
                                @RequestParam String reporter,
-                               @RequestParam IssuePriority issuePriority,
-                               @RequestParam IssueType issueType,
+                               @RequestParam Issue.IssuePriority issuePriority,
+                               @RequestParam Issue.IssueType issueType,
                                Model model
                                ) {
 

@@ -99,14 +99,12 @@
     <form method="get" name="sprints">
         <table>
             <tr>
-                <th>Project title</th>
                 <th>Sprint title</th>
                 <th>Start date</th>
                 <th>End date</th>
             </tr>
             <#list sprints as sprint>
                 <tr>
-                    <td>${sprint.project.getTitle()!"none"}</a></td>
                     <td>${sprint.getTitle()!"none"}</a></td>
                     <td>${sprint.startDate!"none"}</a></td>
                     <td>${sprint.endDate!"none"}</a></td>

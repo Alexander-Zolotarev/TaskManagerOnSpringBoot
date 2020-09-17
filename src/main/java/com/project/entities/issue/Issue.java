@@ -19,6 +19,7 @@ public class Issue {
     private String title;
 
     @Column(name = "issue_type")
+    @Enumerated(value = EnumType.STRING)
     private IssueType issueType;
 
     @ManyToOne
@@ -195,5 +196,14 @@ public class Issue {
             this.title = title;
         }
     }
+
+    public enum IssuePriority {
+        LOW, MIDDLE, HIGH
+    }
+
+    public enum IssueType {
+        EPIC, STORY, TASK, BUG
+    }
+
 
 }

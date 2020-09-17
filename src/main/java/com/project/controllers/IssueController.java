@@ -5,7 +5,6 @@ import com.project.entities.Project;
 import com.project.entities.Sprint;
 import com.project.entities.User;
 import com.project.entities.issue.Issue;
-import com.project.entities.issue.IssuePriority;
 import com.project.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -45,7 +44,7 @@ public class IssueController {
         if(title.isEmpty()) {
             model.addAttribute("issues", issueRepository.findByBacklog(backlog));
         } else {
-            model.addAttribute("issues", issueRepository.findByTitle(title));
+            model.addAttribute("issues", issueRepository.findByTitleAndBacklog(title, backlog));
         }
         model
                 .addAttribute("projectID",projectRepository.findById(projectId).get().getId())
@@ -68,7 +67,7 @@ public class IssueController {
 
     @PostMapping("project/{id}/issueListInProject/priorityFilter")
     public String priorityFilter(@PathVariable("id") Integer projectId,
-                                 @RequestParam IssuePriority issuePriority,
+                                 @RequestParam Issue.IssuePriority issuePriority,
                                  Model model) {
         Project project = projectRepository.findById(projectId).get();
         Backlog backlog = backlogRepository.findByProject(project);
@@ -77,7 +76,7 @@ public class IssueController {
             model.addAttribute("issues", issueRepository.findByBacklog(backlog));
         }
 
-        model.addAttribute("issues", issueRepository.findByIssuePriority(issuePriority));
+        model.addAttribute("issues", issueRepository.findByIssuePriorityAndBacklog(issuePriority, backlog));
 
         model
                 .addAttribute("projectID",projectRepository.findById(projectId).get().getId())
@@ -109,7 +108,7 @@ public class IssueController {
         if(date==null) {
             model.addAttribute("issues", issueRepository.findByBacklog(backlog));
         } else {
-            model.addAttribute("issues", issueRepository.findByDataCreate(date));
+            model.addAttribute("issues", issueRepository.findByDataCreateAndBacklog(date, backlog));
         }
 
         model
@@ -144,7 +143,7 @@ public class IssueController {
         if(executor.isEmpty()) {
             model.addAttribute("issues", issueRepository.findByBacklog(backlog));
         } else {
-            model.addAttribute("issues", issueRepository.findByExecutor(executorIssues));
+            model.addAttribute("issues", issueRepository.findByExecutorAndBacklog(executorIssues, backlog));
         }
 
         model
@@ -179,7 +178,7 @@ public class IssueController {
         if(reporter.isEmpty()) {
             model.addAttribute("issues", issueRepository.findByBacklog(backlog));
         } else {
-            model.addAttribute("issues", issueRepository.findByReporter(reporterIssues));
+            model.addAttribute("issues", issueRepository.findByReporterAndBacklog(reporterIssues, backlog));
         }
 
         model
@@ -211,7 +210,7 @@ public class IssueController {
         Backlog backlog = backlogRepository.findByProject(project);
 
         Sprint sprint = sprintRepository.findByTitle(sprintName);
-        Issue parentIssue = issueRepository.findByTitleAndBacklog(parentIssueName, backlog);
+        Issue parentIssue = issueRepository.findByTitleAndBacklog(parentIssueName, backlog).get(0);
 
         Issue issue = issueRepository.findById(issueId).get();
 
