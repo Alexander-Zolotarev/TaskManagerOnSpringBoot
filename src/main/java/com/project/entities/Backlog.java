@@ -1,6 +1,8 @@
 package com.project.entities;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "backlogs")
@@ -11,10 +13,12 @@ public class Backlog{
     private Integer id;
 
     @Column(name = "title")
+    @Size(min = 2, max = 20, message = "Backlog should be from 2 to 20 symbols")
     private String title;
 
     @OneToOne
     @JoinColumn(name = "project_id")
+    @NotBlank(message = "Choose the project")
     private Project project;
 
     public Backlog() {

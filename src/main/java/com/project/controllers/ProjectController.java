@@ -4,21 +4,22 @@ import com.project.entities.Backlog;
 import com.project.entities.Project;
 import com.project.entities.Sprint;
 import com.project.entities.User;
-import com.project.entities.issue.Issue;
+import com.project.entities.Issue;
 import com.project.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.*;
 
 @Controller
+@ControllerAdvice
 public class ProjectController {
 
     @Autowired
@@ -111,35 +112,64 @@ public class ProjectController {
     }
 
     @PostMapping("createProject")
-    public String createProject(@RequestParam String title,
-                                @RequestParam String description,
-                                @RequestParam String subdivision,
-                                @RequestParam String supervisor,
-                                @RequestParam String admin,
+    public String createProject(@ModelAttribute(name = "project") Project project,
+//                                @RequestParam String title,
+//                                @RequestParam String description,
+//                                @RequestParam String subdivision,
+//                                @RequestParam String supervisor,
+//                                @RequestParam String admin,
+                                BindingResult bindingResult,
                                 Model model) {
 
-        User supervisorUser = userRepository.findById(Integer.parseInt(supervisor)).get();
-        User adminUser = userRepository.findById(Integer.parseInt(admin)).get();
+        User admin = project.getAdmin();
+        User supervisor = project.getSupervisor();
+        String title = project.getTitle();
 
-        Project project = new Project(title, description, subdivision,supervisorUser,adminUser);
-        projectRepository.save(project);
 
-        Integer projectId = project.getId();
+        if(bindingResult.hasErrors()) {
+            //List<FieldError> fieldErrors = bindingResult.getFieldErrors();
+            Map<String, String> errorsMap = ControllerUtil.getErrors(bindingResult);
+            model.addAttribute("errors", errorsMap);
+            model.addAttribute("project", project);
+            return "createProject";
+        } else {
 
-        Backlog backlog = new Backlog("Backlog" + " " + projectId, project);
-        backlogRepository.save(backlog);
+//        User supervisorUser = userRepository.findById(Integer.parseInt(supervisor)).get();
+//        User adminUser = userRepository.findById(Integer.parseInt(admin)).get();
+//
+//        String[] supervisor = supervisorName.split(" ");
+//        User supervisorProject = userRepository.findByFirstNameAndLastName(supervisor[0], supervisor[1]);
+//
+//        String[] admin = adminName.split(" ");
+//        User adminProject = userRepository.findByFirstNameAndLastName(admin[0], admin[1]);
 
-        model
-                .addAttribute("projectID",projectId)
-                .addAttribute("title",title)
-                .addAttribute("description", description)
-                .addAttribute("supervisorID", supervisor)
-                .addAttribute("subdivision", subdivision)
-                .addAttribute("adminID", admin);
 
-        model.addAttribute("backlogTitle", backlog.getTitle());
+//            Project projectCur = new Project(
+//                    title,
+//                    description,
+//                    subdivision,
+//                    supervisorProject,
+//                    adminProject
+//            );
+            projectRepository.save(project);
 
-        return "redirect:/projectsList";
+            Integer projectId = project.getId();
+
+            Backlog backlog = new Backlog("Backlog" + " " + projectId, project);
+            backlogRepository.save(backlog);
+
+            model
+                    .addAttribute("projectID", projectId)
+                    .addAttribute("title", project.getTitle())
+                    .addAttribute("description", project.getDescription())
+                    .addAttribute("supervisorID", project.getSupervisor())
+                    .addAttribute("subdivision", project.getSubdivision())
+                    .addAttribute("adminID", project.getAdmin());
+
+            model.addAttribute("backlogTitle", backlog.getTitle());
+
+            return "redirect:/projectsList";
+        }
     }
 
     @PostMapping("project/{id}/projectInfo")

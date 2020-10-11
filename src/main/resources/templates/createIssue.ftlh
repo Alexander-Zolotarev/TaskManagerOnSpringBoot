@@ -19,7 +19,7 @@
         <label>Название</label>
         <input type="text" name="title" /><br>
         <label>Описание</label>
-        <input type="text" name="description" /><br>
+        <textarea name="description"></textarea><br>
         <label>Исполнитель</label>
         <input type="text" name="executor" /><br>
         <label>Репортер</label>

@@ -4,7 +4,7 @@ import com.project.entities.Backlog;
 import com.project.entities.Project;
 import com.project.entities.Sprint;
 import com.project.entities.User;
-import com.project.entities.issue.Issue;
+import com.project.entities.Issue;
 import com.project.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Controller
 public class IssueController {

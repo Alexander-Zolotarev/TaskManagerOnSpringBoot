@@ -1,6 +1,8 @@
 package com.project.entities;
 
 import javax.persistence.*;
+import javax.validation.constraints.Past;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
 
 @Entity
@@ -12,6 +14,7 @@ public class Sprint{
     private Integer id;
 
     @Column(name = "title")
+    @Size(min = 2, max = 30, message = "Title should be from 2 to 30 symbols")
     private String title;
 
     @ManyToOne
@@ -22,6 +25,7 @@ public class Sprint{
     private LocalDate startDate;
 
     @Column(name = "end_date")
+    @Past
     private LocalDate endDate;
 
     public Sprint() {}

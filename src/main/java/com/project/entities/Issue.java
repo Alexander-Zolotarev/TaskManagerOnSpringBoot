@@ -1,10 +1,8 @@
-package com.project.entities.issue;
-
-import com.project.entities.Backlog;
-import com.project.entities.Sprint;
-import com.project.entities.User;
+package com.project.entities;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
 
 @Entity
@@ -16,7 +14,25 @@ public class Issue {
     private Integer id;
 
     @Column(name = "title")
+    @Size(min = 2, max = 30, message = "Title should be from 2 to 30 symbols")
     private String title;
+
+    @Column(name = "description")
+    private String description;
+
+    @ManyToOne
+    @JoinColumn(name = "executor_id")
+    @NotBlank(message = "Choose executor")
+    private User executor;
+
+    @ManyToOne
+    @JoinColumn(name = "reporter_id")
+    @NotBlank(message = "Choose reporter")
+    private User reporter;
+
+    @Column(name = "issue_priority")
+    @Enumerated(value = EnumType.STRING)
+    private IssuePriority issuePriority;
 
     @Column(name = "issue_type")
     @Enumerated(value = EnumType.STRING)
@@ -33,24 +49,9 @@ public class Issue {
     @Column(name = "date_create")
     private LocalDate dataCreate;
 
-    @Column(name = "description")
-    private String description;
-
-    @ManyToOne
-    @JoinColumn(name = "executor_id")
-    private User executor;
-
-    @ManyToOne
-    @JoinColumn(name = "reporter_id")
-    private User reporter;
-
     @Column(name = "workflow")
     @Enumerated(value = EnumType.STRING)
     private WorkFlowIssue workFlowIssue;
-
-    @Column(name = "issue_priority")
-    @Enumerated(value = EnumType.STRING)
-    private IssuePriority issuePriority;
 
     @ManyToOne
     @JoinColumn(name = "backlog_id")

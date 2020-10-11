@@ -3,7 +3,7 @@ package com.project.repository;
 import com.project.entities.Backlog;
 import com.project.entities.Sprint;
 import com.project.entities.User;
-import com.project.entities.issue.Issue;
+import com.project.entities.Issue;
 import org.springframework.data.repository.CrudRepository;
 
 import java.time.LocalDate;

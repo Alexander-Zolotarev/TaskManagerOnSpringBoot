@@ -1,6 +1,8 @@
 package com.project.entities;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 @Entity
 @Table(name="projects")
@@ -11,20 +13,24 @@ public class Project {
     private Integer id;
 
     @Column(name="title")
+    @Size(min = 2, max = 30, message = "Title should be from 2 to 30 symbols")
     private String title;
 
     @Column(name="description")
     private String description;
 
     @Column(name="subdivision")
+    @Size(min = 10, max = 50, message = "Subdivision should be from 10 to 50 symbols")
     private String subdivision;
 
     @OneToOne
     @JoinColumn(name = "supervisor_id")
+    //@NotBlank(message = "Choose supervisor")
     private User supervisor;
 
     @OneToOne
     @JoinColumn(name="admin_id")
+    //@NotBlank(message = "Choose admin")
     private User admin;
 
     public Project(String title, String description, String subdivision, User supervisor, User admin) {
